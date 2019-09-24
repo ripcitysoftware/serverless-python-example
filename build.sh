@@ -33,7 +33,7 @@ package_code() {
     echo -e "\n\tPackage code!"
     mkdir $BUILD_DIR
 
-    cp app.py lambda.py $BUILD_DIR
+    cp src/app.py src/lambda.py $BUILD_DIR
 
     pipenv lock -r >requirements.txt
     pip install -r requirements.txt --no-deps -t build

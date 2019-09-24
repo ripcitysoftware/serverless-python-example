@@ -9,6 +9,7 @@ serverless-wsgi = "*"
 simplejson = "*"
 
 [dev-packages]
+botostubs = "*"
 autopep8 = "*"
 awscli = "*"
 boto3 = "*"

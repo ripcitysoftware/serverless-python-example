@@ -2,6 +2,8 @@ from flask import Flask, jsonify, make_response, abort
 from uuid import UUID, uuid4
 
 from flask import request
+from dynamo import DynamoDB
+
 
 app = Flask(__name__)
 
@@ -11,22 +13,20 @@ app = Flask(__name__)
         # "ProgrammingLanguage": {"S": "Java"},
         # "ProgrammingLanguage2": {"S": "Python"}
 
+dynamo = DynamoDB()
+
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
 
 @app.route("/employees", methods=['POST'])
-def say_hello():
+def create_employee():
     if not request.json or not 'Name' in request.json:
         abort(400)
-    employee = {
-        'id': str(uuid4()),
-        'Name': request.json['Name'],
-        'Cloud': request.json['Cloud'],
-        'ProgrammingLanguage': request.json['pl'],
-        'ProgrammingLanguage2': request.json['pl2']
-    }
-    return jsonify({'Employee': employee}), 201
+    
+    response = dynamo.create_employee(request)
+    
+    return jsonify({'Employee': response}), 201
 
 @app.route("/employees/<uuid:uuid>", methods=['GET'])
 def get_employee(uuid):

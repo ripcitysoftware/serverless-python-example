@@ -1,6 +1,19 @@
 = NFJS Python Flask Lambda
+:toc:
 
-== Setup VS Code debugging
+== Getting Started
+
+Make sure you have `Python` and `pipenv` installed. Then run these commands:
+
+[source,bash]
+----
+$ pipenv install
+$ pipenv install -d
+$ pipenv shell
+$ code .
+----
+
+== Setup VSCode for debugging
 
 Put  the following into a file named `launch.json` located in your `.vscode` directory:
 
@@ -28,3 +41,17 @@ Put  the following into a file named `launch.json` located in your `.vscode` dir
     ]
 }
 ----
+
+== Useful Commands
+
+[source,bash]
+----
+$ sam local generate-event apigateway aws-proxy --path employees --method GET > event.json # <1>
+$
+$ awslocal lambda invoke --function-name \
+  arn:aws:lambda:us-east-1:000000000000:function:ExampleLambda \
+  --payload file://event.json output.json && cat output.json # <2>
+----
+<1> Run https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html[SAM] to generage an API Gateway based, event you can use to invoke your Lambda.
+
+<2> Use the event generated above and invoke the Lambda directly, simulating a REST API call via an API Gateway.
