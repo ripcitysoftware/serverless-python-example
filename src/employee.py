@@ -1,7 +1,11 @@
 import boto3
-import os
-from uuid import UUID, uuid4
-from simplejson import dumps, loads
+from uuid import uuid4
+
+NAME_KEY = 'name'
+CLOUD_KEY = 'cloud'
+PL_KEY = 'pl2'
+PL2_KEY = 'pl'
+
 
 TABLE_KEY = 'nfjs-example'
 DYNAMODB_ENDPOINT_KEY = 'DYNAMODB_ENDPOINT_URL'
@@ -15,11 +19,8 @@ class DynamoDBException(Exception):
 
 class Employee(object):
     def __init__(self):
-        if DYNAMODB_ENDPOINT_KEY in os.environ:
-            dynamodb = boto3.resource(
-                'dynamodb', endpoint_url='http://localhost:4569')
-        else:
-            dynamodb = boto3.resource('dynamodb')
+        dynamodb = boto3.resource(
+            'dynamodb', endpoint_url='http://localhost:4569')
 
         self.db = dynamodb.Table(TABLE_KEY)
 
@@ -34,11 +35,11 @@ class Employee(object):
 
         id = str(uuid4())
         employee = {
-            'id': str(uuid4()),
-            'Name': context.json['Name'],
-            'Cloud': context.json['Cloud'],
-            'ProgrammingLanguage': context.json['pl'],
-            'ProgrammingLanguage2': context.json['pl2']
+            'uuid': str(uuid4()),
+            'name': context.json[NAME_KEY],
+            'cloud': context.json[CLOUD_KEY],
+            'programmingLanguage': context.json[PL2_KEY],
+            'programmingLanguage2': context.json[PL_KEY]
         }
         print(f'Employee is {employee}')
         self.db.put_item(Item=employee)
@@ -51,13 +52,10 @@ class Employee(object):
 
         response = self.db.get_item(
             Key={
-                'Uuid': str(uuid)
+                'uuid': str(uuid)
             }
         )
         if 'Item' not in response:
             raise DynamoDBException(f'{uuid} has no context', 404)
 
-        item = response['Item']
-        item = loads(item, use_decimal=True)
-        return item
-
+        return response['Item']

@@ -48,7 +48,7 @@ Put  the following into a file named `launch.json` located in your `.vscode` dir
 ----
 ----
 $ curl -X POST -H "Content-Type: application/json" \
-      -d '{"name": "Chris Lahdesmaki", "cloud": "AWS", "pl": "Java", "pl2": "Python"}' \
+      -d '{"name": "Chris Lahdesmaki", "cloud": "Azure", "pl": "C++", "pl2": "PL1"}' \
       -Lik http://127.0.0.1:5000/employees && echo
 $
 $ curl -Lik http://127.0.0.1:5000/employees/$(uuidgen)

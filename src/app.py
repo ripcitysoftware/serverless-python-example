@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, make_response, abort
-from uuid import UUID, uuid4
 
-from employee import Employee
+from . employee import Employee
+
 employee = Employee()
 
 from flask import request
@@ -14,11 +14,11 @@ def not_found(error):
 
 @app.route("/employees", methods=['POST'])
 def create_employee():
-    if not request.json or not 'Name' in request.json:
+    if not request.json or not 'name' in request.json:
         abort(400)
-    
+
     response = employee.save_employee(request)
-    
+
     return jsonify({'Employee': response}), 201
 
 @app.route("/employees/<uuid:uuid>", methods=['GET'])
