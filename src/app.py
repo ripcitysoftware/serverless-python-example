@@ -2,6 +2,7 @@ from flask import Flask, jsonify, make_response, abort
 from uuid import UUID, uuid4
 
 from employee import Employee
+employee = Employee()
 
 from flask import request
 
@@ -26,7 +27,9 @@ def get_employee(uuid):
     if uuid is None:
         abort(404)
 
-    return jsonify({'employee': str(uuid)})
+    response = employee.get_employee(uuid)
+
+    return jsonify({'employee': response})
 
 
 if __name__ == '__main__':

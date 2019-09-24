@@ -42,7 +42,17 @@ Put  the following into a file named `launch.json` located in your `.vscode` dir
 }
 ----
 
-== Useful Commands
+== Useful `curl` commands
+
+[source,bash]
+----
+----
+$ curl -X POST -H "Content-Type: application/json" \
+      -d '{"Name": "Chris Lahdesmaki", "Cloud": "AWS", "pl": "Java", "pl2": "Python"}' \
+      -Lik http://127.0.0.1:5000/employees && echo
+$
+$ curl -Lik http://127.0.0.1:5000/employees/$(uuidgen)
+== Useful SAM and AWS cli Commands
 
 [source,bash]
 ----
@@ -55,3 +65,4 @@ $ awslocal lambda invoke --function-name \
 <1> Run https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html[SAM] to generage an API Gateway based, event you can use to invoke your Lambda.
 
 <2> Use the event generated above and invoke the Lambda directly, simulating a REST API call via an API Gateway.
+
