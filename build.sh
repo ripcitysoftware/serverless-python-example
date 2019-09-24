@@ -21,7 +21,7 @@ DEFAULT_UUID="b884f9b5-b7c9-4c3b-a87b-97f4cfdb3702"
 
 show_help() {
 cat << EOF
-Usage: ${0##*/} [-hdv] [-i | s | l | t]
+Usage: ${0##*/} [-hdv] [-i | s | l | t] [-c]
   Build AWS resources, mostly in LocalStack
       -h   display this help and exit
       -d   debug mode
@@ -31,6 +31,8 @@ Usage: ${0##*/} [-hdv] [-i | s | l | t]
       -s   invoke the Lambda locally via SAM
       -l   create/update the lambda
       -t   test the GET endpoint
+
+      -c   clean localstack
 EOF
 }
 
@@ -55,7 +57,7 @@ package_code() {
 
 create_lambda() {
     echo -e "\n\tCreate Lambda!"
-    # check if Lambda exists
+     check if Lambda exists
     EXISTS=$($LCMD list-functions \
         --query "Functions[?FunctionName==\`${FUNCTION_NAME}\`]" \
         --output text)
@@ -139,6 +141,16 @@ print_sam() {
     set +x
 }
 
+clean_localstack() {
+    echo "stopping docker-compose"
+    docker-compose down
+
+    echo "cleaning up .localstack"
+    rm -fr ./localstack/*
+
+    echo "all done!"
+}
+
 create_apigateway() {
     echo -e "\n\tAPI Gateway"
     API_ID=$(${GCMD} create-rest-api \
@@ -201,8 +213,9 @@ info=
 sam=
 lambda=
 test=
+clean=
 
-while getopts "hdvislt" opt; do
+while getopts "hdvisltc" opt; do
   case "$opt" in
        h)  show_help; exit 0;;
        d)  debug=1;;
@@ -210,12 +223,15 @@ while getopts "hdvislt" opt; do
        s)  sam=1;;
        l)  lambda=1;;
        t)  test=1;;
+       c)  clean=1;;
        v)  verbose=$((verbose+1));;
        \?) show_help >&2; exit 1;;
    esac
 done
 
 [[ $debug -eq 1 ]] && set -x
+
+[[ $clean -eq 1 ]] && clean_localstack && exit 0
 
 [[ $info -eq 1 ]] && print_endpoints && exit 0
 
