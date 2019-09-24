@@ -71,11 +71,11 @@ create_dynamodb_item() {
         jq -n \
             --arg uuid "$UUID" \
             '{
-        Uuid: {S: $uuid},
-        "Name": {"S": "Maki"},
-        "Cloud": {"S": "AWS"},
-        "ProgrammingLanguage": {"S": "Java"},
-        "ProgrammingLanguage2": {"S": "Python"}
+        "uuid": {S: $uuid},
+        "name": {"S": "Maki"},
+        "cloud": {"S": "AWS"},
+        "programmingLanguage": {"S": "Java"},
+        "programmingLanguage2": {"S": "Python"}
         }'
     )
     echo $item >item.json
@@ -86,8 +86,8 @@ create_dynamodb() {
     $DCMD create-table \
         --table-name ${DYNAMODB_TABLE} \
         --attribute-definitions \
-        AttributeName=Uuid,AttributeType=S \
-        --key-schema AttributeName=Uuid,KeyType=HASH \
+        AttributeName=uuid,AttributeType=S \
+        --key-schema AttributeName=uuid,KeyType=HASH \
         --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
 
     create_dynamodb_item
