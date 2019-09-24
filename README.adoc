@@ -17,7 +17,7 @@ $ code .
 
 Put  the following into a file named `launch.json` located in your `.vscode` directory:
 
-[source,json]
+[source]
 ----
 {
     // Use IntelliSense to learn about possible attributes.
