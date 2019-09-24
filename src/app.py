@@ -1,19 +1,11 @@
 from flask import Flask, jsonify, make_response, abort
 from uuid import UUID, uuid4
 
-from flask import request
-from dynamo import DynamoDB
+from employee import Employee
 
+from flask import request
 
 app = Flask(__name__)
-
-        # Uuid: {S: $uuid},
-        # "Name": {"S": "Maki"},
-        # "Cloud": {"S": "AWS"},
-        # "ProgrammingLanguage": {"S": "Java"},
-        # "ProgrammingLanguage2": {"S": "Python"}
-
-dynamo = DynamoDB()
 
 @app.errorhandler(404)
 def not_found(error):
@@ -24,7 +16,7 @@ def create_employee():
     if not request.json or not 'Name' in request.json:
         abort(400)
     
-    response = dynamo.create_employee(request)
+    response = employee.save_employee(request)
     
     return jsonify({'Employee': response}), 201
 
