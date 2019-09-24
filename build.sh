@@ -17,11 +17,11 @@ API_NAME=nfjs_api
 AWS_DEFAULT_REGION=us-east-1
 STAGE=dev
 
-DEFAULT_UUID="B884F9B5-B7C9-4C3B-A87B-97F4CFDB3702"
+DEFAULT_UUID="b884f9b5-b7c9-4c3b-a87b-97f4cfdb3702"
 
 show_help() {
 cat << EOF
-Usage: ${0##*/} [-hdv] [-i] [-s]
+Usage: ${0##*/} [-hdv] [-i | s | l | t]
   Build AWS resources, mostly in LocalStack
       -h   display this help and exit
       -d   debug mode
@@ -29,12 +29,19 @@ Usage: ${0##*/} [-hdv] [-i] [-s]
 
       -i   print out the API Gateway endpoints
       -s   invoke the Lambda locally via SAM
+      -l   create/update the lambda
+      -t   test the GET endpoint
 EOF
 }
 
 package_code() {
     echo -e "\n\tPackage code!"
-    mkdir $BUILD_DIR
+
+    if [ -d $BUILD_DIR ]; then
+       rm -fr $BUILD_DIR/*
+    else
+       mkdir $BUILD_DIR
+   fi
 
     cp src/*.py $BUILD_DIR
 
@@ -49,21 +56,21 @@ package_code() {
 create_lambda() {
     echo -e "\n\tCreate Lambda!"
     # check if Lambda exists
-    EXISTS=$(eval "$LCMD list-functions \
-        --query 'Functions[?FunctionName==\`$FUNCTION_NAME\`]' \
-        --output text")
+    EXISTS=$($LCMD list-functions \
+        --query "Functions[?FunctionName==\`${FUNCTION_NAME}\`]" \
+        --output text)
 
     if [ -z "$EXISTS" ]; then
-        eval "$LCMD create-function \
+        $LCMD create-function \
         --function-name $FUNCTION_NAME \
-        --zip-file file://$BUILD_ARTIFACT \
+        --zip-file fileb://$BUILD_ARTIFACT \
         --runtime $RUNTIME \
         --role arn:aws:iam::123456:role/role-name \
-        --handler $HANDLER"
+        --handler $HANDLER
     else
-        eval "$LCMD update-function-code \
+        $LCMD update-function-code \
         --function-name ${FUNCTION_NAME} \
-        --zip-file fileb://${BUILD_ARTIFACT}"
+        --zip-file fileb://${BUILD_ARTIFACT}
     fi
 
 }
@@ -100,19 +107,23 @@ create_dynamodb() {
 }
 
 get_lambda_arn() {
-    set -x
     $LCMD list-functions \
         --query "Functions[?FunctionName==\`${FUNCTION_NAME}\`].FunctionArn" \
         --output text
-    set +x
 }
 
 print_endpoints() {
-    API_ID=$(${GCMD} get-rest-apis | jq -r '.items[].id')
+    API_ID=$(${GCMD} get-rest-apis | jq -r '.items[0].id')
     ENDPOINT="http://localhost:4567/restapis/${API_ID}/${STAGE}/_user_request_/employees"
     echo "API available at:"
     echo "GET ${ENDPOINT}/:uuid"
     echo "POST ${ENDPOINT}"
+}
+
+test_lambda() {
+    set -x
+    curl -Lik http://127.0.0.1:5000/employees/$DEFAULT_UUID
+    set +x
 }
 
 print_sam() {
@@ -188,13 +199,17 @@ debug=
 verbose=
 info=
 sam=
+lambda=
+test=
 
-while getopts "hdvis" opt; do
+while getopts "hdvislt" opt; do
   case "$opt" in
        h)  show_help; exit 0;;
        d)  debug=1;;
        i)  info=1;;
        s)  sam=1;;
+       l)  lambda=1;;
+       t)  test=1;;
        v)  verbose=$((verbose+1));;
        \?) show_help >&2; exit 1;;
    esac
@@ -204,7 +219,11 @@ done
 
 [[ $info -eq 1 ]] && print_endpoints && exit 0
 
+[[ $lambda -eq 1 ]] && create_lambda && exit 0
+
 [[ $sam -eq 1 ]] && print_sam && exit 0
+
+[[ $test -eq 1 ]] && test_lambda && exit 0
 
 package_code
 create_lambda
