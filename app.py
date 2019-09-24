@@ -34,13 +34,3 @@ def get_employee(uuid):
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
-# https://scotch.io/bar-talk/processing-incoming-request-data-in-flask
-# https://blog.miguelgrinberg.com/post/designing-a-restful-api-with-python-and-flask
-#
-# curl -X POST -H "Content-Type: application/json" \
-#      -d '{"Name": "Chris Lahdesmaki", "Cloud": "AWS", "pl": "Java", "pl2": "Python"}' \
-#      -Lik http://127.0.0.1:5000/employees && echo
-#
-# curl -Lik http://127.0.0.1:5000/employees/$(uuidgen)
