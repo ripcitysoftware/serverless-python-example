@@ -41,12 +41,12 @@ package_code() {
        rm -fr $BUILD_DIR/*
     else
        mkdir $BUILD_DIR
-   fi
+    fi
 
-    cp *.py $BUILD_DIR
+    cp -r serverless_python_example lambda.py $BUILD_DIR
 
-    pipenv lock -r >requirements.txt
-    pip install -r requirements.txt --no-deps -t build
+    pipenv lock -r > requirements.txt
+    pip install -r requirements.txt --no-deps -t $BUILD_DIR
 
     pushd $BUILD_DIR
     zip -r example.zip *
@@ -87,7 +87,11 @@ create_dynamodb_item() {
         "programmingLanguage2": {"S": "Python"}
         }'
     )
-    echo $item > output/item.json
+    echo $item > item.json
+
+    $DCMD put-item \
+        --table-name ${DYNAMODB_TABLE} \
+        --item file://item.json
 }
 
 create_dynamodb() {
@@ -100,10 +104,6 @@ create_dynamodb() {
         --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
 
     create_dynamodb_item
-
-    $DCMD put-item \
-        --table-name ${DYNAMODB_TABLE} \
-        --item file://output/item.json
 }
 
 get_lambda_arn() {
@@ -127,15 +127,15 @@ test_lambda() {
 }
 
 print_sam() {
-    EVENT_FILE="output/event.json"
-    OUT_FILE="output/output.json"
+    EVENT_FILE="event.json"
+    OUT_FILE="output.json"
 
     echo "generate the same EVENT an API Gateway would so you can local invoke the lambda, see $EVENT_FILE"
 
     set -x
     sam local generate-event apigateway aws-proxy --path employees/$DEFAULT_UUID --method GET > $EVENT_FILE
 
-    awslocal lambda invoke --function-name $(get_lambda_arn) --payload file://$EVENT_FILE $OUT_FILE
+    $LCMD invoke --function-name $(get_lambda_arn) --payload file://$EVENT_FILE $OUT_FILE
     set +x
 }
 

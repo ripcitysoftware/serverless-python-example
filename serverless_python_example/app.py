@@ -1,16 +1,17 @@
-from flask import Flask, jsonify, make_response, abort
+from flask import Flask, abort, jsonify, make_response, request
 
-from employee import Employee
+from .employee import Employee
 
 employee = Employee()
 
-from flask import request
 
 app = Flask(__name__)
+
 
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
+
 
 @app.route("/employees", methods=['POST'])
 def create_employee():
@@ -20,6 +21,7 @@ def create_employee():
     response = employee.save_employee(request)
 
     return jsonify({'Employee': response}), 201
+
 
 @app.route("/employees/<uuid:uuid>", methods=['GET'])
 def get_employee(uuid):

@@ -1,5 +1,6 @@
-import boto3
 from uuid import uuid4
+
+import boto3
 
 NAME_KEY = 'name'
 CLOUD_KEY = 'cloud'
@@ -35,7 +36,7 @@ class Employee(object):
 
         id = str(uuid4())
         employee = {
-            'uuid': str(uuid4()),
+            'uuid': id,
             'name': context.json[NAME_KEY],
             'cloud': context.json[CLOUD_KEY],
             'programmingLanguage': context.json[PL2_KEY],
