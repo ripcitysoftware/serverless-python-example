@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, make_response, abort
 
-from . employee import Employee
+from employee import Employee
 
 employee = Employee()
 

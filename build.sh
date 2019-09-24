@@ -43,7 +43,7 @@ package_code() {
        mkdir $BUILD_DIR
    fi
 
-    cp src/*.py $BUILD_DIR
+    cp *.py $BUILD_DIR
 
     pipenv lock -r >requirements.txt
     pip install -r requirements.txt --no-deps -t build
@@ -87,7 +87,7 @@ create_dynamodb_item() {
         "programmingLanguage2": {"S": "Python"}
         }'
     )
-    echo $item >item.json
+    echo $item > output/item.json
 }
 
 create_dynamodb() {
@@ -103,7 +103,7 @@ create_dynamodb() {
 
     $DCMD put-item \
         --table-name ${DYNAMODB_TABLE} \
-        --item file://item.json
+        --item file://output/item.json
 }
 
 get_lambda_arn() {
@@ -127,8 +127,8 @@ test_lambda() {
 }
 
 print_sam() {
-    EVENT_FILE="event.json"
-    OUT_FILE="output.json"
+    EVENT_FILE="output/event.json"
+    OUT_FILE="output/output.json"
 
     echo "generate the same EVENT an API Gateway would so you can local invoke the lambda, see $EVENT_FILE"
 
