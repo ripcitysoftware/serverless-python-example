@@ -17,15 +17,18 @@ API_NAME=nfjs_api
 AWS_DEFAULT_REGION=us-east-1
 STAGE=dev
 
+DEFAULT_UUID="B884F9B5-B7C9-4C3B-A87B-97F4CFDB3702"
+
 show_help() {
 cat << EOF
-Usage: ${0##*/} [-hdv] [-i]
+Usage: ${0##*/} [-hdv] [-i] [-s]
   Build AWS resources, mostly in LocalStack
       -h   display this help and exit
       -d   debug mode
       -v   verbose mode. Can be used multiple times for increased verbosity
 
       -i   print out the API Gateway endpoints
+      -s   invoke the Lambda locally via SAM
 EOF
 }
 
@@ -33,7 +36,7 @@ package_code() {
     echo -e "\n\tPackage code!"
     mkdir $BUILD_DIR
 
-    cp src/app.py src/lambda.py $BUILD_DIR
+    cp src/*.py $BUILD_DIR
 
     pipenv lock -r >requirements.txt
     pip install -r requirements.txt --no-deps -t build
@@ -53,7 +56,7 @@ create_lambda() {
     if [ -z "$EXISTS" ]; then
         eval "$LCMD create-function \
         --function-name $FUNCTION_NAME \
-        --zip-file fileb://$BUILD_ARTIFACT \
+        --zip-file file://$BUILD_ARTIFACT \
         --runtime $RUNTIME \
         --role arn:aws:iam::123456:role/role-name \
         --handler $HANDLER"
@@ -66,10 +69,9 @@ create_lambda() {
 }
 
 create_dynamodb_item() {
-    UUID=$(uuidgen)
     item=$(
         jq -n \
-            --arg uuid "$UUID" \
+            --arg uuid "$DEFAULT_UUID" \
             '{
         "uuid": {S: $uuid},
         "name": {"S": "Maki"},
@@ -98,9 +100,11 @@ create_dynamodb() {
 }
 
 get_lambda_arn() {
+    set -x
     $LCMD list-functions \
         --query "Functions[?FunctionName==\`${FUNCTION_NAME}\`].FunctionArn" \
         --output text
+    set +x
 }
 
 print_endpoints() {
@@ -109,6 +113,19 @@ print_endpoints() {
     echo "API available at:"
     echo "GET ${ENDPOINT}/:uuid"
     echo "POST ${ENDPOINT}"
+}
+
+print_sam() {
+    EVENT_FILE="event.json"
+    OUT_FILE="output.json"
+
+    echo "generate the same EVENT an API Gateway would so you can local invoke the lambda, see $EVENT_FILE"
+
+    set -x
+    sam local generate-event apigateway aws-proxy --path employees/$DEFAULT_UUID --method GET > $EVENT_FILE
+
+    awslocal lambda invoke --function-name $(get_lambda_arn) --payload file://$EVENT_FILE $OUT_FILE
+    set +x
 }
 
 create_apigateway() {
@@ -170,12 +187,14 @@ create_apigateway() {
 debug=
 verbose=
 info=
+sam=
 
-while getopts "hdvi" opt; do
+while getopts "hdvis" opt; do
   case "$opt" in
        h)  show_help; exit 0;;
        d)  debug=1;;
        i)  info=1;;
+       s)  sam=1;;
        v)  verbose=$((verbose+1));;
        \?) show_help >&2; exit 1;;
    esac
@@ -184,6 +203,8 @@ done
 [[ $debug -eq 1 ]] && set -x
 
 [[ $info -eq 1 ]] && print_endpoints && exit 0
+
+[[ $sam -eq 1 ]] && print_sam && exit 0
 
 package_code
 create_lambda
