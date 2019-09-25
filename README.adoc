@@ -31,7 +31,7 @@ Put  the following into a file named `launch.json` located in your `.vscode` dir
             "request": "launch",
             "module": "flask",
             "env": {
-                "FLASK_APP": "src/app.py",
+                "FLASK_APP": "serverless_python_example/app.py",
                 "FLASK_ENV": "development",
                 "FLASK_DEBUG": "0"
             },
@@ -50,8 +50,13 @@ $ curl -X POST -H "Content-Type: application/json" \
       -d '{"name": "Chris Lahdesmaki", "cloud": "Azure", "pl": "C++", "pl2": "PL1"}' \
       -Lik http://127.0.0.1:5000/employees && echo
 $
-$ curl -Lik http://127.0.0.1:5000/employees/$(uuidgen)
+$ curl -Lik http://127.0.0.1:5000/employees/<uuid> # <1>
+$
+$ curl -Lik http://127.0.0.1:5000/employees/b884f9b5-b7c9-4c3b-a87b-97f4cfdb3702 # <2>
 ----
+<1> Use the UUID returned from the `curl -X POST` command above.
+
+<2>There's a default entry in the DyamoDB table with this UUID
 
 == Useful SAM and AWS cli Commands
 
