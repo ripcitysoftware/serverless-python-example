@@ -57,7 +57,7 @@ package_code() {
 
 create_lambda() {
     echo -e "\n\tCreate Lambda!"
-     check if Lambda exists
+    # check if Lambda exists
     EXISTS=$($LCMD list-functions \
         --query "Functions[?FunctionName==\`${FUNCTION_NAME}\`]" \
         --output text)
