@@ -1,9 +1,7 @@
 from flask import Flask, abort, jsonify, make_response, request
-
 from .employee import Employee
 
 employee = Employee()
-
 
 app = Flask(__name__)
 
