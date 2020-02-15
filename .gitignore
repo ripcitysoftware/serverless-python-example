@@ -8,3 +8,5 @@ requirements.txt
 __pycache__
 *.iml
 .DS_Store
+.localstack
+
