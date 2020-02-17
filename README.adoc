@@ -8,10 +8,13 @@ Make sure you have `Python` and `pipenv` installed. Then run these commands:
 [source,bash]
 ----
 $ pipenv install --dev
-$ pipenv shell # <1>
+$ docker-compose up -d # <1>
+$ pipenv shell # <2>
 $ code .
 ----
-<1> if you are new to Python and `pipenv` you will want to setup your shell to automatically enter the virtual `pipenv shell` whenever you cd into this directory. You can also do this manually but if you are like me you'll forget more than you'll remember.
+<1> This will startup LoacalStack. You'll need LocalStack to be running so your can locally debug your Python application.
+
+<2> if you are new to Python and `pipenv` you will want to setup your shell to automatically enter the virtual `pipenv shell` whenever you cd into this directory. You can also do this manually but if you are like me you'll forget more than you'll remember.
 
 == Setup VSCode for debugging
 
